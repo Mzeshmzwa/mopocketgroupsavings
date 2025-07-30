@@ -19,7 +19,6 @@ import {
   FaTimesCircle,
   FaEye,
   FaChartLine,
-  FaUsers,
   FaUserFriends,
 } from "react-icons/fa";
 
@@ -80,8 +79,9 @@ export default function HomePage() {
           axiosInstance.get("/api/savings-groups/public")
         ]);
 
-        setMyGroups(groupsRes.data.groups || []);
-        setPublicGroups(publicGroupsRes.data.groups || []);
+        // Update to handle the new response structure
+        setMyGroups(groupsRes.data.data?.groups || []);
+        setPublicGroups(publicGroupsRes.data.data?.groups || []);
       } catch (err) {
         console.error("Failed to fetch groups:", err);
       }
@@ -285,7 +285,7 @@ export default function HomePage() {
         ) : (
           <div className="text-center py-8 text-gray-500">
             <FaUserFriends className="text-5xl mx-auto mb-3 opacity-50" />
-            <p>You haven't joined any savings groups yet</p>
+            <p>You have not joined any savings groups yet</p>
             <button
               onClick={() => navigate('/savings-groups/public')}
               className="mt-4 text-blue-600 hover:text-blue-800"

@@ -607,55 +607,67 @@ export default function AdminDashboard() {
           )}
 
           {/* Savings Groups Tab */}
-          {activeTab === 'savings-groups' && (
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">Savings Groups</h3>
-              <div className="grid gap-4">
-                {savingsGroups.map((group, index) => (
-                  <div key={index} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h4 className="font-semibold text-gray-800">{group.name}</h4>
-                        <p className="text-sm text-gray-600">Created by: {group.creatorId}</p>
-                        <p className="text-sm text-gray-500">Members: {group.members?.length || 0}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-semibold text-lg">E{group.totalBalance?.toFixed(2) || '0.00'}</p>
-                        <p className="text-sm text-gray-500">Total Balance</p>
-                        <span className={`inline-block px-2 py-1 mt-2 rounded-full text-xs font-medium ${
-                          group.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                        }`}>
-                          {group.status}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="mt-4">
-                      <div className="flex justify-between text-sm text-gray-600">
-                        <span>Target Amount: E{group.targetAmount?.toFixed(2) || '0.00'}</span>
-                        <span>Contribution: E{group.contributionAmount?.toFixed(2) || '0.00'}</span>
-                      </div>
-                      <div className="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-blue-600 rounded-full"
-                          style={{ 
-                            width: `${Math.min((group.totalBalance / group.targetAmount) * 100, 100)}%`
-                          }}
-                        ></div>
-                      </div>
-                    </div>
-                    <div className="mt-4 flex gap-2">
-                      <button 
-                        onClick={() => navigate(`/admin/savings-groups/${group._id}`)}
-                        className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
-                      >
-                        View Details
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
+  {activeTab === 'savings-groups' && (
+  <div className="bg-white rounded-lg shadow p-6">
+    <div className="flex justify-between items-center mb-4">
+      <h3 className="text-lg font-semibold text-gray-800">Savings Groups</h3>
+      <button 
+        onClick={() => navigate("/savings-groups/create")}
+        className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+      >
+        Create Savings Group
+      </button>
+    </div>
+
+    <div className="grid gap-4">
+      {savingsGroups.map((group, index) => (
+        <div key={index} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
+          <div className="flex justify-between items-start">
+            <div>
+              <h4 className="font-semibold text-gray-800">{group.name}</h4>
+              <p className="text-sm text-gray-600">Created by: {group.creatorId}</p>
+              <p className="text-sm text-gray-500">Members: {group.members?.length || 0}</p>
             </div>
-          )}
+            <div className="text-right">
+              <p className="font-semibold text-lg">E{group.totalBalance?.toFixed(2) || '0.00'}</p>
+              <p className="text-sm text-gray-500">Total Balance</p>
+              <span className={`inline-block px-2 py-1 mt-2 rounded-full text-xs font-medium ${
+                group.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+              }`}>
+                {group.status}
+              </span>
+            </div>
+          </div>
+
+          <div className="mt-4">
+            <div className="flex justify-between text-sm text-gray-600">
+              <span>Target Amount: E{group.targetAmount?.toFixed(2) || '0.00'}</span>
+              <span>Contribution: E{group.contributionAmount?.toFixed(2) || '0.00'}</span>
+            </div>
+            <div className="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-blue-600 rounded-full"
+                style={{ 
+                  width: `${Math.min((group.totalBalance / group.targetAmount) * 100, 100)}%`
+                }}
+              ></div>
+            </div>
+          </div>
+
+          <div className="mt-4 flex gap-2">
+            <button 
+              onClick={() => navigate(`/admin/savings-groups/${group._id}`)}
+              className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
+            >
+              View Details
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+)}
+
 
           {/* Rest of the tabs */}
         </main>

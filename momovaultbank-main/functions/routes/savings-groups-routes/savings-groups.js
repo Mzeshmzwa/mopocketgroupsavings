@@ -151,6 +151,34 @@ router.get("/admin/all", authenticateMiddleware, requireAdmin, async (req, res) 
   }
 });
 
+// 📋 GET MY SAVINGS GROUPS
+router.get("/my-groups", authenticateMiddleware, async (req, res) => {
+  try {
+    const userId = req.user._id;
+    
+    const groups = await SavingsGroup.find({
+      'members.userId': userId
+    })
+    .populate('createdBy', 'userName')
+    .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      data: {
+        groups
+      }
+    });
+
+  } catch (error) {
+    console.error("Get my savings groups error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch your savings groups",
+      error: error.message
+    });
+  }
+});
+
 // 📋 GET PUBLIC SAVINGS GROUPS (For users to browse and join)
 router.get("/public", authenticateMiddleware, async (req, res) => {
   try {
@@ -161,7 +189,7 @@ router.get("/public", authenticateMiddleware, async (req, res) => {
       status: status 
     })
       .populate('createdBy', 'userName')
-      .select('-members') // Don't expose member details in public listing
+      .select('name description targetAmount currentAmount maxMembers currentMembers minimumContribution startDate endDate')
       .sort({ createdAt: -1 })
       .limit(parseInt(limit))
       .skip((parseInt(page) - 1) * parseInt(limit));
