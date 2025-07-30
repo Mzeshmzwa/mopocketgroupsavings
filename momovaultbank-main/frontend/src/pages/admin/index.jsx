@@ -15,6 +15,7 @@ import {
   FaMoneyBillWave,
   FaPercent,
   FaUserFriends, // Add this import for savings groups
+  FaPlus,
 } from "react-icons/fa";
 import StudentViewCommonHeader from "@/components/user-view/header";
 import { useNavigate } from "react-router-dom";
@@ -29,6 +30,22 @@ export default function AdminDashboard() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
   const [savingsGroups, setSavingsGroups] = useState([]);
+  const [showCreateGroupModal, setShowCreateGroupModal] = useState(false);
+  const [createGroupLoading, setCreateGroupLoading] = useState(false);
+  const [createGroupData, setCreateGroupData] = useState({
+    name: '',
+    description: '',
+    targetAmount: '',
+    maxMembers: '',
+    minimumContribution: '',
+    contributionFrequency: 'weekly',
+    startDate: new Date().toISOString().split('T')[0],
+    endDate: '',
+    allowEarlyWithdrawal: false,
+    penaltyPercentage: '10',
+    requiresApproval: true,
+    isPublic: true,
+  });
   
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -133,9 +150,72 @@ export default function AdminDashboard() {
     switch (type) {
       case 'deposit': return 'bg-green-50 border-green-200';
       case 'withdrawal': return 'bg-blue-50 border-blue-200';
+  const handleCreateGroup = async (e) => {
+    e.preventDefault();
+    setCreateGroupLoading(true);
+
+    try {
+      // Validate required fields
+      if (!createGroupData.name || !createGroupData.description || !createGroupData.targetAmount || 
+          !createGroupData.maxMembers || !createGroupData.minimumContribution || !createGroupData.endDate) {
+        alert('Please fill in all required fields');
+        setCreateGroupLoading(false);
+        return;
+      }
       case 'penalty': return 'bg-red-50 border-red-200';
+      // Validate dates
+      const startDate = new Date(createGroupData.startDate);
+      const endDate = new Date(createGroupData.endDate);
+      
+      if (endDate <= startDate) {
+        alert('End date must be after start date');
+        setCreateGroupLoading(false);
+        return;
+      }
       default: return 'bg-gray-50 border-gray-200';
+      const response = await axiosInstance.post('/api/savings-groups/create', {
+        ...createGroupData,
+        targetAmount: parseFloat(createGroupData.targetAmount),
+        maxMembers: parseInt(createGroupData.maxMembers),
+        minimumContribution: parseFloat(createGroupData.minimumContribution),
+        penaltyPercentage: parseFloat(createGroupData.penaltyPercentage),
+      });
     }
+      if (response.data.success) {
+        alert('Savings group created successfully!');
+        setShowCreateGroupModal(false);
+        // Reset form
+        setCreateGroupData({
+          name: '',
+          description: '',
+          targetAmount: '',
+          maxMembers: '',
+          minimumContribution: '',
+          contributionFrequency: 'weekly',
+          startDate: new Date().toISOString().split('T')[0],
+          endDate: '',
+          allowEarlyWithdrawal: false,
+          penaltyPercentage: '10',
+          requiresApproval: true,
+          isPublic: true,
+        });
+        // Refresh the groups list
+        const groupsRes = await axiosInstance.get("/api/savings-groups/admin/all");
+        setSavingsGroups(groupsRes.data.groups || []);
+      }
+    } catch (error) {
+      console.error('Create group error:', error);
+      alert(error.response?.data?.message || 'Failed to create savings group');
+    } finally {
+      setCreateGroupLoading(false);
+    }
+  };
+  };
+  const handleInputChange = (field, value) => {
+    setCreateGroupData(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
   if (loading) {
@@ -609,6 +689,17 @@ export default function AdminDashboard() {
           {/* Savings Groups Tab */}
           {activeTab === 'savings-groups' && (
             <div className="bg-white rounded-lg shadow p-6">
+             {/* Header with Create Button */}
+             <div className="flex justify-between items-center">
+               <h3 className="text-2xl font-bold text-gray-800">Savings Groups Management</h3>
+               <button
+                 onClick={() => setShowCreateGroupModal(true)}
+                 className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center gap-2 transition-all"
+               >
+                 <FaPlus />
+                 Create New Group
+               </button>
+             </div>
               <h3 className="text-lg font-semibold text-gray-800 mb-4">Savings Groups</h3>
               <div className="grid gap-4">
                 {savingsGroups.map((group, index) => (
@@ -643,23 +734,261 @@ export default function AdminDashboard() {
                         ></div>
                       </div>
                     </div>
+         {/* Create Group Modal */}
+         {showCreateGroupModal && (
+           <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+             <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+               <div className="p-6">
+                 <div className="flex justify-between items-center mb-6">
+                   <h2 className="text-2xl font-bold text-gray-800">Create New Savings Group</h2>
+                   <button
+                     onClick={() => setShowCreateGroupModal(false)}
+                     className="text-gray-500 hover:text-gray-700"
+                     disabled={createGroupLoading}
+                   >
+                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                     </svg>
+                   </button>
+                 </div>
                     <div className="mt-4 flex gap-2">
+                 <form onSubmit={handleCreateGroup} className="space-y-4">
+                   {/* Basic Information */}
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                     <div className="md:col-span-2">
+                       <label className="block text-sm font-medium text-gray-700 mb-1">
+                         Group Name *
+                       </label>
+                       <input
+                         type="text"
+                         required
+                         value={createGroupData.name}
+                         onChange={(e) => handleInputChange('name', e.target.value)}
+                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                         placeholder="Enter group name"
+                         disabled={createGroupLoading}
+                       />
+                     </div>
                       <button 
+                     <div className="md:col-span-2">
+                       <label className="block text-sm font-medium text-gray-700 mb-1">
+                         Description *
+                       </label>
+                       <textarea
+                         required
+                         value={createGroupData.description}
+                         onChange={(e) => handleInputChange('description', e.target.value)}
+                         rows={3}
+                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                         placeholder="Describe the purpose of this savings group"
+                         disabled={createGroupLoading}
+                       />
+                     </div>
                         onClick={() => navigate(`/admin/savings-groups/${group._id}`)}
+                     <div>
+                       <label className="block text-sm font-medium text-gray-700 mb-1">
+                         Target Amount (EUR) *
+                       </label>
+                       <input
+                         type="number"
+                         required
+                         min="1"
+                         step="0.01"
+                         value={createGroupData.targetAmount}
+                         onChange={(e) => handleInputChange('targetAmount', e.target.value)}
+                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                         placeholder="10000"
+                         disabled={createGroupLoading}
+                       />
+                     </div>
                         className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
+                     <div>
+                       <label className="block text-sm font-medium text-gray-700 mb-1">
+                         Maximum Members *
+                       </label>
+                       <input
+                         type="number"
+                         required
+                         min="2"
+                         max="100"
+                         value={createGroupData.maxMembers}
+                         onChange={(e) => handleInputChange('maxMembers', e.target.value)}
+                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                         placeholder="20"
+                         disabled={createGroupLoading}
+                       />
+                     </div>
                       >
+                     <div>
+                       <label className="block text-sm font-medium text-gray-700 mb-1">
+                         Minimum Contribution (EUR) *
+                       </label>
+                       <input
+                         type="number"
+                         required
+                         min="1"
+                         step="0.01"
+                         value={createGroupData.minimumContribution}
+                         onChange={(e) => handleInputChange('minimumContribution', e.target.value)}
+                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                         placeholder="50"
+                         disabled={createGroupLoading}
+                       />
+                     </div>
                         View Details
+                     <div>
+                       <label className="block text-sm font-medium text-gray-700 mb-1">
+                         Contribution Frequency
+                       </label>
+                       <select
+                         value={createGroupData.contributionFrequency}
+                         onChange={(e) => handleInputChange('contributionFrequency', e.target.value)}
+                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                         disabled={createGroupLoading}
+                       >
+                         <option value="daily">Daily</option>
+                         <option value="weekly">Weekly</option>
+                         <option value="monthly">Monthly</option>
+                       </select>
+                     </div>
                       </button>
+                     <div>
+                       <label className="block text-sm font-medium text-gray-700 mb-1">
+                         Start Date *
+                       </label>
+                       <input
+                         type="date"
+                         required
+                         value={createGroupData.startDate}
+                         onChange={(e) => handleInputChange('startDate', e.target.value)}
+                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                         disabled={createGroupLoading}
+                       />
+                     </div>
                     </div>
+                     <div>
+                       <label className="block text-sm font-medium text-gray-700 mb-1">
+                         End Date *
+                       </label>
+                       <input
+                         type="date"
+                         required
+                         value={createGroupData.endDate}
+                         onChange={(e) => handleInputChange('endDate', e.target.value)}
+                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                         disabled={createGroupLoading}
+                       />
+                     </div>
+                   </div>
                   </div>
+                   {/* Rules and Settings */}
+                   <div className="border-t pt-4">
+                     <h3 className="text-lg font-semibold text-gray-800 mb-4">Group Rules & Settings</h3>
+                     
+                     <div className="space-y-3">
+                       <div className="flex items-center">
+                         <input
+                           type="checkbox"
+                           id="allowEarlyWithdrawal"
+                           checked={createGroupData.allowEarlyWithdrawal}
+                           onChange={(e) => handleInputChange('allowEarlyWithdrawal', e.target.checked)}
+                           className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                           disabled={createGroupLoading}
+                         />
+                         <label htmlFor="allowEarlyWithdrawal" className="ml-2 block text-sm text-gray-700">
+                           Allow Early Withdrawal
+                         </label>
+                       </div>
                 ))}
+                       <div className="flex items-center">
+                         <input
+                           type="checkbox"
+                           id="requiresApproval"
+                           checked={createGroupData.requiresApproval}
+                           onChange={(e) => handleInputChange('requiresApproval', e.target.checked)}
+                           className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                           disabled={createGroupLoading}
+                         />
+                         <label htmlFor="requiresApproval" className="ml-2 block text-sm text-gray-700">
+                           Require Admin Approval for Actions
+                         </label>
+                       </div>
               </div>
+                       <div className="flex items-center">
+                         <input
+                           type="checkbox"
+                           id="isPublic"
+                           checked={createGroupData.isPublic}
+                           onChange={(e) => handleInputChange('isPublic', e.target.checked)}
+                           className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                           disabled={createGroupLoading}
+                         />
+                         <label htmlFor="isPublic" className="ml-2 block text-sm text-gray-700">
+                           Make Group Public (visible to all users)
+                         </label>
+                       </div>
             </div>
+                       <div className="flex items-center space-x-4">
+                         <label className="block text-sm font-medium text-gray-700">
+                           Early Withdrawal Penalty (%)
+                         </label>
+                         <input
+                           type="number"
+                           min="0"
+                           max="50"
+                           step="0.1"
+                           value={createGroupData.penaltyPercentage}
+                           onChange={(e) => handleInputChange('penaltyPercentage', e.target.value)}
+                           className="w-20 px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           disabled={createGroupLoading}
+                         />
+                       </div>
+                     </div>
+                   </div>
           )}
+                   {/* Action Buttons */}
+                   <div className="flex justify-end space-x-4 pt-6 border-t">
+                     <button
+                       type="button"
+                       onClick={() => setShowCreateGroupModal(false)}
+                       className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                       disabled={createGroupLoading}
+                     >
+                       Cancel
+                     </button>
+                     <button
+                       type="submit"
+                       disabled={createGroupLoading}
+                       className={`px-4 py-2 rounded-md text-white font-semibold flex items-center gap-2 ${
+                         createGroupLoading 
+                           ? 'bg-gray-400 cursor-not-allowed' 
+                           : 'bg-green-600 hover:bg-green-700'
+                       }`}
+                     >
+                       {createGroupLoading ? (
+                         <>
+                           <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                           </svg>
+                           Creating...
+                         </>
+                       ) : (
+                         <>
+                           <FaPlus />
+                           Create Group
+                         </>
+                       )}
+                     </button>
+                   </div>
+                 </form>
+               </div>
+             </div>
+           </div>
+         )}
 
           {/* Rest of the tabs */}
         </main>
-      </div> 
     </>
   );
 }
