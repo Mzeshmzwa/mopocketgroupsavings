@@ -13,6 +13,7 @@ import HomePage from "@/pages/user/home";
 import NotFoundPage from "@/pages/not-found";
 import DepositPage from "@/pages/user/deposit";
 import WithdrawPage from "@/pages/user/withdraw";
+import ContributePage from "@/pages/savings-groups/contribute";
 
 function App() {
   const { auth } = useContext(AuthContext);
@@ -113,6 +114,16 @@ function App() {
           element={
             <RouteGuard
               element={<AllGroups />}
+              authenticated={auth?.authenticate}
+              user={auth?.user}
+            />
+          }
+        />
+        <Route
+          path="/savings-groups/:groupId/contribute"
+          element={
+            <RouteGuard
+              element={<ContributePage />}
               authenticated={auth?.authenticate}
               user={auth?.user}
             />

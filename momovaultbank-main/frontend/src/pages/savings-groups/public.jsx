@@ -7,29 +7,28 @@ const PublicGroups = () => {
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [userGroups, setUserGroups] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchPublicGroups = async () => {
+    const fetchGroups = async () => {
       try {
-        console.log('Fetching public groups...');
-        const response = await axiosInstance.get('/api/savings-groups/public');
-        console.log('Public groups response:', response.data);
+        const [publicGroupsRes, myGroupsRes] = await Promise.all([
+          axiosInstance.get('/api/savings-groups/public'),
+          axiosInstance.get('/api/savings-groups/my-groups')
+        ]);
         
-        if (response.data.success && response.data.data.groups) {
-          setGroups(response.data.data.groups);
-        } else {
-          setError('No public groups available');
-        }
+        setGroups(publicGroupsRes.data.data.groups);
+        setUserGroups(myGroupsRes.data.data.groups.map(g => g._id));
         setLoading(false);
       } catch (err) {
-        console.error('Error fetching public groups:', err);
-        setError(err?.response?.data?.message || 'Failed to fetch public groups');
+        console.error('Error fetching groups:', err);
+        setError(err?.response?.data?.message || 'Failed to fetch groups');
         setLoading(false);
       }
     };
 
-    fetchPublicGroups();
+    fetchGroups();
   }, []);
 
   const handleJoinGroup = async (groupId) => {
@@ -43,15 +42,8 @@ const PublicGroups = () => {
     }
   };
 
-  const getStatusBadge = (status) => {
-    switch (status) {
-      case 'active':
-        return 'bg-green-100 text-green-800';
-      case 'draft':
-        return 'bg-yellow-100 text-yellow-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
+  const isUserMember = (groupId) => {
+    return userGroups.includes(groupId);
   };
 
   if (loading) return (
@@ -96,8 +88,10 @@ const PublicGroups = () => {
             <div key={group._id} className="bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow p-6 border border-gray-200">
               <div className="flex justify-between items-start mb-4">
                 <h2 className="text-xl font-semibold text-gray-800">{group.name}</h2>
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusBadge(group.status)}`}>
-                  {group.status === 'draft' ? 'Coming Soon' : group.status}
+                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                  group.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                }`}>
+                  {group.status}
                 </span>
               </div>
               
@@ -119,17 +113,21 @@ const PublicGroups = () => {
               </div>
 
               <div className="flex justify-end">
-                <button
-                  onClick={() => handleJoinGroup(group._id)}
-                  disabled={group.status === 'draft'}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-                    group.status === 'draft' 
-                      ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
-                      : 'bg-blue-600 text-white hover:bg-blue-700'
-                  }`}
-                >
-                  {group.status === 'draft' ? 'Coming Soon' : 'Join Group'} <FaArrowRight />
-                </button>
+                {isUserMember(group._id) ? (
+                  <button
+                    onClick={() => navigate(`/savings-groups/${group._id}/contribute`)}
+                    className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                  >
+                    <FaMoneyBillWave /> Contribute
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => handleJoinGroup(group._id)}
+                    className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    Join Group <FaArrowRight />
+                  </button>
+                )}
               </div>
             </div>
           ))}

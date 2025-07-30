@@ -75,9 +75,10 @@ router.post("/create", authenticateMiddleware, requireAdmin, async (req, res) =>
       rules: {
         allowEarlyWithdrawal: allowEarlyWithdrawal || false,
         penaltyPercentage: penaltyPercentage || 10,
-        requiresApproval: requiresApproval !== false // default true
+        requiresApproval: requiresApproval !== false
       },
-      isPublic: isPublic !== false // default true
+      isPublic: isPublic !== false,
+      status: 'active'  // Set status as active by default
     });
 
     await savingsGroup.save();
