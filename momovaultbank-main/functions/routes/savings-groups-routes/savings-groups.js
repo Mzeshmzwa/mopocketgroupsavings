@@ -182,22 +182,22 @@ router.get("/my-groups", authenticateMiddleware, async (req, res) => {
 // 📋 GET PUBLIC SAVINGS GROUPS (For users to browse and join)
 router.get("/public", authenticateMiddleware, async (req, res) => {
   try {
-    const { status = 'active', page = 1, limit = 10 } = req.query;
+    const { status, page = 1, limit = 10 } = req.query;
     
-    const groups = await SavingsGroup.find({ 
-      isPublic: true, 
-      status: status 
-    })
+    const query = { 
+      isPublic: true,
+      // Allow both active and draft status
+      status: { $in: ['active', 'draft'] }
+    };
+
+    const groups = await SavingsGroup.find(query)
       .populate('createdBy', 'userName')
-      .select('name description targetAmount currentAmount maxMembers currentMembers minimumContribution startDate endDate')
+      .select('name description targetAmount currentAmount maxMembers currentMembers minimumContribution startDate endDate status')
       .sort({ createdAt: -1 })
       .limit(parseInt(limit))
       .skip((parseInt(page) - 1) * parseInt(limit));
 
-    const total = await SavingsGroup.countDocuments({ 
-      isPublic: true, 
-      status: status 
-    });
+    const total = await SavingsGroup.countDocuments(query);
 
     res.status(200).json({
       success: true,

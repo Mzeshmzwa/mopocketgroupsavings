@@ -30,7 +30,6 @@ export default function CreateSavingsGroup() {
     setError('');
 
     try {
-      // Format the data before sending
       const formattedData = {
         ...formData,
         targetAmount: Number(formData.targetAmount),
@@ -38,12 +37,13 @@ export default function CreateSavingsGroup() {
         minimumContribution: Number(formData.minimumContribution),
         penaltyPercentage: Number(formData.penaltyPercentage),
         startDate: new Date(formData.startDate).toISOString(),
-        endDate: new Date(formData.endDate).toISOString()
+        endDate: new Date(formData.endDate).toISOString(),
+        isPublic: true // Ensure groups are created as public by default
       };
 
       const response = await axiosInstance.post('/api/savings-groups/create', formattedData);
       if (response.data.success) {
-        navigate('/admin');  // Navigate back to admin dashboard after success
+        navigate('/savings-groups/public'); // Redirect to public groups page after creation
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to create group');

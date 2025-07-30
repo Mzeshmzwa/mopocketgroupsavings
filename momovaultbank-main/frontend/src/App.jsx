@@ -2,6 +2,9 @@ import { Route, Routes, Navigate } from "react-router-dom";
 import AuthPage from "@/pages/auth";
 import AdminDashboard from "@/pages/admin";
 import CreateSavingsGroup from "@/pages/savings-groups/create";
+import MyGroups from "@/pages/savings-groups/my-groups";
+import PublicGroups from "@/pages/savings-groups/public";
+import AllGroups from "@/pages/savings-groups/all";
 import RouteGuard from "./components/route-guard";
 import { useContext } from "react";
 import { AuthContext } from "./context/auth-context";
@@ -80,6 +83,36 @@ function App() {
           element={
             <RouteGuard
               element={<CreateSavingsGroup />}
+              authenticated={auth?.authenticate}
+              user={auth?.user}
+            />
+          }
+        />
+        <Route
+          path="/savings-groups/my-groups"
+          element={
+            <RouteGuard
+              element={<MyGroups />}
+              authenticated={auth?.authenticate}
+              user={auth?.user}
+            />
+          }
+        />
+        <Route
+          path="/savings-groups/public"
+          element={
+            <RouteGuard
+              element={<PublicGroups />}
+              authenticated={auth?.authenticate}
+              user={auth?.user}
+            />
+          }
+        />
+        <Route
+          path="/savings-groups/all"
+          element={
+            <RouteGuard
+              element={<AllGroups />}
               authenticated={auth?.authenticate}
               user={auth?.user}
             />
