@@ -1,4 +1,3 @@
-
 const mongoose = require('mongoose');
 
 const transactionSchema = new mongoose.Schema({
@@ -7,7 +6,7 @@ const transactionSchema = new mongoose.Schema({
   amount: { type: Number, required: true },
   lockPeriodInDays: Number,
   penaltyFee: Number,
-  momoTransactionId: String,
+  momoTransactionId: { type: String, index: true }, // ✅ index defined inline
   relatedLockedDepositIndex: { type: mongoose.Schema.Types.Mixed }, // Can be Number (old) or ObjectId (new)
   createdAt: { type: Date, default: Date.now },
 });

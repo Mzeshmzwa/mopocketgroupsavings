@@ -32,8 +32,7 @@ const groupContributionSchema = new mongoose.Schema({
     default: 'momo'
   },
   momoTransactionId: {
-    type: String,
-    sparse: true
+    type: String // ✅ removed sparse from here
   },
   status: {
     type: String,
@@ -55,7 +54,7 @@ const groupContributionSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Indexes
+// ✅ Only define index here
 groupContributionSchema.index({ groupId: 1, userId: 1 });
 groupContributionSchema.index({ status: 1 });
 groupContributionSchema.index({ createdAt: -1 });

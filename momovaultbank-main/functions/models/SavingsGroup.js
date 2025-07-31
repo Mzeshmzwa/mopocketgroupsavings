@@ -122,8 +122,7 @@ const savingsGroupSchema = new mongoose.Schema({
 // Indexes for better query performance
 savingsGroupSchema.index({ status: 1, isPublic: 1 });
 savingsGroupSchema.index({ createdBy: 1 });
-savingsGroupSchema.index({ 'members.userId': 1 });
-savingsGroupSchema.index({ inviteCode: 1 });
+savingsGroupSchema.index({ 'members.userId': 1 }); // ✅ Removed duplicate inviteCode index
 
 // Virtual for progress percentage
 savingsGroupSchema.virtual('progressPercentage').get(function() {
