@@ -38,12 +38,7 @@ export default function MyGroups() {
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">My Savings Groups</h1>
-          <button
-            onClick={() => navigate('/api/savings-groups/public')}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-          >
-            Join New Group
-          </button>
+       
         </div>
 
         {groups.length > 0 ? (

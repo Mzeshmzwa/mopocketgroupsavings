@@ -326,7 +326,7 @@ export default function DepositPage() {
               <input
                 type="tel"
                 name="phoneNumber"
-                placeholder="76123456 or 26876123456"
+                placeholder="76123456 or 26878123456"
                 value={formData.phoneNumber}
                 onChange={handleInputChange}
                 className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-colors"
@@ -334,7 +334,7 @@ export default function DepositPage() {
               />
             </div>
             <p className="text-xs text-gray-500 mt-1">
-              Enter your Eswatini mobile number (76, 78, or 79)
+              Enter your MTN Eswatini number (76 or 78)
             </p>
           </div>
 

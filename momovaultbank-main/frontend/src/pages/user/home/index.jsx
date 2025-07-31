@@ -310,12 +310,7 @@ export default function HomePage() {
                     Minimum contribution: E{group.minimumContribution}
                   </div>
                 </div>
-                <button
-                  onClick={() => navigate(`/savings-groups/${group._id}/join`)}
-                  className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
-                >
-                  Join Group
-                </button>
+              
               </div>
             </div>
           ))}
