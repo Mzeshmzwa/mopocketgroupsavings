@@ -158,12 +158,12 @@ export default function GroupDetails() {
                       <FaUserCircle className="text-2xl text-gray-400" />
                       <div>
                         <p className="font-medium text-gray-800">
-                          {typeof member.userId === 'string' 
-                            ? `User #${member.userId.slice(0, 8)}` 
-                            : `User #${member.userId?._id?.slice(0, 8) || 'Unknown'}`
-                          }
+                          {member.userId.userName || 'Unknown User'}
                         </p>
                         <p className="text-sm text-gray-600">
+                          {member.userId.phoneNumber || 'No phone number'}
+                        </p>
+                        <p className="text-xs text-gray-500">
                           Joined {new Date(member.joinedAt).toLocaleDateString()}
                         </p>
                       </div>

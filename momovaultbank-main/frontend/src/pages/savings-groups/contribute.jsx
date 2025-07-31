@@ -56,11 +56,22 @@ export default function ContributePage() {
         return;
       }
 
-      // Make contribution request
-      const res = await axiosInstance.post(`/api/savings-groups/${groupId}/contribute`, formData);
+      // Convert amount to number and validate
+      const contributionAmount = parseFloat(formData.amount);
+      if (isNaN(contributionAmount) || contributionAmount < group.minimumContribution) {
+        setError(`Contribution must be at least E${group.minimumContribution}`);
+        setLoading(false);
+        return;
+      }
+
+      // Make contribution request with properly formatted amount
+      const res = await axiosInstance.post(`/api/savings-groups/${groupId}/contribute`, {
+        ...formData,
+        amount: contributionAmount // Send as number, not string
+      });
+      
       if (res.data.success) {
-        // Navigate to success page or show success message
-        navigate(`/savings-groups/${groupId}/success`);
+        navigate(`/savings-groups/${groupId}`);
       } else {
         setError(res.data.message || 'Failed to make contribution');
       }
