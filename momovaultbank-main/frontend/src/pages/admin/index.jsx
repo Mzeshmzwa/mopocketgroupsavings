@@ -41,19 +41,26 @@ export default function AdminDashboard() {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const [userRes, txRes, vaultRes, revenueRes, groupsRes] = await Promise.all([
+        // Separate the groups request for better error handling
+        const groupsRes = await axiosInstance.get("/api/savings-groups/admin/all");
+        console.log("Groups response:", groupsRes.data); // Debug log
+        
+        if (groupsRes.data.success && groupsRes.data.data.groups) {
+          setSavingsGroups(groupsRes.data.data.groups);
+        }
+
+        // Other data fetching
+        const [userRes, txRes, vaultRes, revenueRes] = await Promise.all([
           axiosInstance.get("/api/admin/users"),
           axiosInstance.get("/api/admin/transaction"),
           axiosInstance.get("/api/admin/vault"),
           axiosInstance.get("/api/admin/revenue"),
-          axiosInstance.get("/api/savings-groups/admin/all")
         ]);
 
         setUsers(userRes.data.users || []);
         setTransactions(txRes.data.transaction || []);
         setVaults(vaultRes.data.vault || []);
         setRevenueData(revenueRes.data.data || null);
-        setSavingsGroups(groupsRes.data.groups || []);
       } catch (err) {
         console.error("Admin fetch error:", err?.response?.data || err.message);
       } finally {
@@ -62,6 +69,20 @@ export default function AdminDashboard() {
     };
     fetchData();
   }, []);
+
+  // Add group status change handler
+  const handleGroupStatusChange = async (groupId, newStatus) => {
+    try {
+      await axiosInstance.put(`/api/savings-groups/${groupId}`, { status: newStatus });
+      // Refresh groups after status change
+      const groupsRes = await axiosInstance.get("/api/savings-groups/admin/all");
+      if (groupsRes.data.success) {
+        setSavingsGroups(groupsRes.data.data.groups);
+      }
+    } catch (err) {
+      console.error("Failed to update group status:", err);
+    }
+  };
 
   // Calculate statistics
   const stats = {
@@ -607,66 +628,89 @@ export default function AdminDashboard() {
           )}
 
           {/* Savings Groups Tab */}
-  {activeTab === 'savings-groups' && (
-  <div className="bg-white rounded-lg shadow p-6">
-    <div className="flex justify-between items-center mb-4">
-      <h3 className="text-lg font-semibold text-gray-800">Savings Groups</h3>
-      <button 
-        onClick={() => navigate("/savings-groups/create")}
-        className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
-      >
-        Create Savings Group
-      </button>
-    </div>
+          {activeTab === 'savings-groups' && (
+    <div className="bg-white rounded-lg shadow p-6">
+      <div className="flex justify-between items-center mb-6">
+        <h3 className="text-lg font-semibold text-gray-800">Savings Groups</h3>
+        <button 
+          onClick={() => navigate("/savings-groups/create")}
+          className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+        >
+          <FaUserFriends />
+          Create Savings Group
+        </button>
+      </div>
 
-    <div className="grid gap-4">
-      {savingsGroups.map((group, index) => (
-        <div key={index} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
-          <div className="flex justify-between items-start">
-            <div>
-              <h4 className="font-semibold text-gray-800">{group.name}</h4>
-              <p className="text-sm text-gray-600">Created by: {group.creatorId}</p>
-              <p className="text-sm text-gray-500">Members: {group.members?.length || 0}</p>
-            </div>
-            <div className="text-right">
-              <p className="font-semibold text-lg">E{group.totalBalance?.toFixed(2) || '0.00'}</p>
-              <p className="text-sm text-gray-500">Total Balance</p>
-              <span className={`inline-block px-2 py-1 mt-2 rounded-full text-xs font-medium ${
-                group.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-              }`}>
-                {group.status}
-              </span>
-            </div>
-          </div>
-
-          <div className="mt-4">
-            <div className="flex justify-between text-sm text-gray-600">
-              <span>Target Amount: E{group.targetAmount?.toFixed(2) || '0.00'}</span>
-              <span>Contribution: E{group.contributionAmount?.toFixed(2) || '0.00'}</span>
-            </div>
-            <div className="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-blue-600 rounded-full"
-                style={{ 
-                  width: `${Math.min((group.totalBalance / group.targetAmount) * 100, 100)}%`
-                }}
-              ></div>
-            </div>
-          </div>
-
-          <div className="mt-4 flex gap-2">
-            <button 
-              onClick={() => navigate(`/admin/savings-groups/${group._id}`)}
-              className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
-            >
-              View Details
-            </button>
-          </div>
+      {savingsGroups.length === 0 ? (
+        <div className="text-center py-8 text-gray-500">
+          No savings groups found
         </div>
-      ))}
+      ) : (
+        <div className="grid gap-4">
+          {savingsGroups.map((group) => (
+            <div key={group._id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
+              <div className="flex justify-between items-start">
+                <div>
+                  <h4 className="font-semibold text-gray-800">{group.name}</h4>
+                  <p className="text-sm text-gray-600">
+                    Created by: {group.createdBy?.userName || 'Unknown'}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    Members: {group.currentMembers}/{group.maxMembers}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="font-semibold text-lg">
+                    E{group.currentAmount?.toFixed(2) || '0.00'}
+                  </p>
+                  <p className="text-sm text-gray-500">Current Amount</p>
+                  <span className={`inline-block px-2 py-1 mt-2 rounded-full text-xs font-medium ${
+                    group.status === 'active' ? 'bg-green-100 text-green-800' : 
+                    group.status === 'completed' ? 'bg-blue-100 text-blue-800' : 
+                    'bg-gray-100 text-gray-800'
+                  }`}>
+                    {group.status}
+                  </span>
+                </div>
+              </div>
+
+              {/* Progress Bar */}
+              <div className="mt-4">
+                <div className="flex justify-between text-sm text-gray-600">
+                  <span>Target: E{group.targetAmount?.toFixed(2) || '0.00'}</span>
+                  <span>Progress: {Math.round((group.currentAmount / group.targetAmount) * 100)}%</span>
+                </div>
+                <div className="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-blue-600 rounded-full"
+                    style={{ width: `${Math.min((group.currentAmount / group.targetAmount) * 100, 100)}%` }}
+                  ></div>
+                </div>
+              </div>
+
+              {/* Group Actions */}
+              <div className="mt-4 flex gap-2">
+                <button 
+                  onClick={() => navigate(`/savings-groups/${group._id}`)}
+                  className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
+                >
+                  View Details
+                </button>
+                {group.status !== 'completed' && (
+                  <button 
+                    onClick={() => handleGroupStatusChange(group._id, 'completed')}
+                    className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700"
+                  >
+                    Mark Complete
+                  </button>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
-  </div>
-)}
+  )}
 
 
           {/* Rest of the tabs */}

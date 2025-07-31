@@ -20,6 +20,7 @@ const adminRoutes = require("./routes/admin-routes/admin.js");
 const savingsGroupsRoutes = require("./routes/savings-groups-routes/savings-groups.js");
 const groupMembershipRoutes = require("./routes/savings-groups-routes/group-membership.js");
 const groupContributionsRoutes = require("./routes/savings-groups-routes/group-contributions.js");
+const withdrawSavingsRoutes = require('./routes/savings-groups-routes/withdraw-savings');
 
 //Disbursement routes
 
@@ -66,6 +67,7 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/savings-groups", savingsGroupsRoutes);
 app.use("/api/savings-groups", groupMembershipRoutes);
 app.use("/api/savings-groups", groupContributionsRoutes);
+app.use('/api/savings-groups', withdrawSavingsRoutes);
 
 // Disbursement Routes
 

@@ -120,35 +120,42 @@ router.get("/admin/all", authenticateMiddleware, requireAdmin, async (req, res) 
       query.status = status;
     }
 
-    const options = {
-      page: parseInt(page),
-      limit: parseInt(limit),
-      sort: { createdAt: -1 },
-      populate: [
-        { path: 'createdBy', select: 'userName userEmail' },
-        { path: 'members.userId', select: 'userName userEmail phoneNumber' }
-      ]
-    };
-
     const groups = await SavingsGroup.find(query)
       .populate('createdBy', 'userName userEmail')
-      .populate('members.userId', 'userName userEmail phoneNumber')
+      .populate('members.userId', 'userName userEmail')
       .sort({ createdAt: -1 })
       .limit(parseInt(limit))
       .skip((parseInt(page) - 1) * parseInt(limit));
 
     const total = await SavingsGroup.countDocuments(query);
 
+    // Calculate progress for each group
+    const groupsWithProgress = groups.map(group => ({
+      _id: group._id,
+      name: group.name,
+      description: group.description,
+      targetAmount: group.targetAmount,
+      currentAmount: group.currentAmount,
+      maxMembers: group.maxMembers,
+      currentMembers: group.currentMembers,
+      minimumContribution: group.minimumContribution,
+      status: group.status,
+      createdBy: group.createdBy,
+      members: group.members,
+      progress: (group.currentAmount / group.targetAmount) * 100,
+      withdrawalPhoneNumber: group.withdrawalPhoneNumber,
+      startDate: group.startDate,
+      endDate: group.endDate
+    }));
+
     res.status(200).json({
       success: true,
       data: {
-        groups,
+        groups: groupsWithProgress,
         pagination: {
           currentPage: parseInt(page),
           totalPages: Math.ceil(total / parseInt(limit)),
-          totalGroups: total,
-          hasNext: parseInt(page) < Math.ceil(total / parseInt(limit)),
-          hasPrev: parseInt(page) > 1
+          totalGroups: total
         }
       }
     });
