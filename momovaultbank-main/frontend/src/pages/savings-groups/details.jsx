@@ -149,9 +149,9 @@ export default function GroupDetails() {
             <div className="p-6">
               <h2 className="text-lg font-semibold text-gray-800 mb-4">Members</h2>
               <div className="space-y-4">
-                {group.members.map((member) => (
+                {group.members.map((member, index) => (
                   <div
-                    key={member.userId}
+                    key={`${member.userId}-${index}`}
                     className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
                   >
                     <div className="flex items-center gap-3">
