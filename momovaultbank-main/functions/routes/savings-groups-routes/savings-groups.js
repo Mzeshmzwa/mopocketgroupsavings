@@ -412,46 +412,36 @@ router.get("/admin/statistics", authenticateMiddleware, requireAdmin, async (req
     const completedGroups = await SavingsGroup.countDocuments({ status: 'completed' });
     const draftGroups = await SavingsGroup.countDocuments({ status: 'draft' });
 
-    // Get total savings across all groups
-    const totalSavingsResult = await SavingsGroup.aggregate([
-      { $group: { _id: null, totalAmount: { $sum: '$currentAmount' } } }
+    // Calculate total savings balance
+    const savingsStats = await SavingsGroup.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalSavingsBalance: { $sum: "$currentAmount" },
+          totalMembers: { $sum: "$currentMembers" }
+        }
+      }
     ]);
-    const totalSavings = totalSavingsResult[0]?.totalAmount || 0;
 
-    // Get total members across all groups
-    const totalMembersResult = await SavingsGroup.aggregate([
-      { $group: { _id: null, totalMembers: { $sum: '$currentMembers' } } }
-    ]);
-    const totalMembers = totalMembersResult[0]?.totalMembers || 0;
-
-    // Get recent contributions
-    const recentContributions = await GroupContribution.find({ status: 'completed' })
-      .populate('userId', 'userName')
-      .populate('groupId', 'name')
-      .sort({ createdAt: -1 })
-      .limit(10);
+    const stats = {
+      totalGroups,
+      activeGroups,
+      completedGroups,
+      draftGroups,
+      totalSavingsBalance: savingsStats[0]?.totalSavingsBalance || 0,
+      totalMembers: savingsStats[0]?.totalMembers || 0,
+    };
 
     res.status(200).json({
       success: true,
-      data: {
-        overview: {
-          totalGroups,
-          activeGroups,
-          completedGroups,
-          draftGroups,
-          totalSavings,
-          totalMembers
-        },
-        recentContributions
-      }
+      data: stats
     });
 
   } catch (error) {
-    console.error("Get savings group statistics error:", error);
+    console.error("Get statistics error:", error);
     res.status(500).json({
       success: false,
-      message: "Failed to fetch statistics",
-      error: error.message
+      message: "Failed to fetch statistics"
     });
   }
 });

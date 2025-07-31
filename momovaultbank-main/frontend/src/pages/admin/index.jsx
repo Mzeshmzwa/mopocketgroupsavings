@@ -15,6 +15,7 @@ import {
   FaMoneyBillWave,
   FaPercent,
   FaUserFriends, // Add this import for savings groups
+  FaTrash,// Import trash icon for delete action
 } from "react-icons/fa";
 import StudentViewCommonHeader from "@/components/user-view/header";
 import { useNavigate } from "react-router-dom";
@@ -41,32 +42,33 @@ export default function AdminDashboard() {
     const fetchData = async () => {
       try {
         setLoading(true);
-        // Separate the groups request for better error handling
-        const groupsRes = await axiosInstance.get("/api/savings-groups/admin/all");
-        console.log("Groups response:", groupsRes.data); // Debug log
+        // Get statistics first
+        const statsRes = await axiosInstance.get("/api/savings-groups/admin/statistics");
         
-        if (groupsRes.data.success && groupsRes.data.data.groups) {
-          setSavingsGroups(groupsRes.data.data.groups);
-        }
-
         // Other data fetching
-        const [userRes, txRes, vaultRes, revenueRes] = await Promise.all([
+        const [groupsRes, userRes, txRes, vaultRes] = await Promise.all([
+          axiosInstance.get("/api/savings-groups/admin/all"),
           axiosInstance.get("/api/admin/users"),
           axiosInstance.get("/api/admin/transaction"),
-          axiosInstance.get("/api/admin/vault"),
-          axiosInstance.get("/api/admin/revenue"),
+          axiosInstance.get("/api/admin/vault")
         ]);
 
+        if (statsRes.data.success) {
+          setRevenueData(statsRes.data.data);
+        }
+
+        setSavingsGroups(groupsRes.data.data.groups || []);
         setUsers(userRes.data.users || []);
         setTransactions(txRes.data.transaction || []);
         setVaults(vaultRes.data.vault || []);
-        setRevenueData(revenueRes.data.data || null);
+
       } catch (err) {
         console.error("Admin fetch error:", err?.response?.data || err.message);
       } finally {
         setLoading(false);
       }
     };
+
     fetchData();
   }, []);
 
@@ -81,6 +83,25 @@ export default function AdminDashboard() {
       }
     } catch (err) {
       console.error("Failed to update group status:", err);
+    }
+  };
+
+  // Add delete handler function near other handlers
+  const handleDeleteGroup = async (groupId) => {
+    if (!window.confirm('Are you sure you want to delete this group?')) {
+      return;
+    }
+    
+    try {
+      await axiosInstance.delete(`/api/savings-groups/${groupId}`);
+      // Refresh groups list after deletion
+      const groupsRes = await axiosInstance.get("/api/savings-groups/admin/all");
+      if (groupsRes.data.success) {
+        setSavingsGroups(groupsRes.data.data.groups);
+      }
+    } catch (err) {
+      console.error("Failed to delete group:", err);
+      alert('Failed to delete group. ' + (err.response?.data?.message || ''));
     }
   };
 
@@ -222,7 +243,7 @@ export default function AdminDashboard() {
           {activeTab === 'overview' && (
             <div className="space-y-6">
               {/* Stats Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                 <div className="bg-white shadow rounded-lg p-6 border-l-4 border-blue-500">
                   <div className="flex items-center justify-between">
                     <div>
@@ -265,6 +286,22 @@ export default function AdminDashboard() {
                       <p className="text-xs text-gray-400">Fees & Penalties</p>
                     </div>
                     <FaMoneyBillWave className="text-3xl text-red-500" />
+                  </div>
+                </div>
+
+                {/* New Total Savings Balance Card */}
+                <div className="bg-white shadow rounded-lg p-6 border-l-4 border-purple-500">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-gray-500">Total Savings Balance</p>
+                      <p className="text-2xl font-bold text-purple-600">
+                        E{(revenueData?.totalSavingsBalance || 0).toFixed(2)}
+                      </p>
+                      <p className="text-xs text-gray-400">
+                        Active Groups: {revenueData?.activeGroups || 0}
+                      </p>
+                    </div>
+                    <FaPiggyBank className="text-3xl text-purple-500" />
                   </div>
                 </div>
               </div>
@@ -696,25 +733,15 @@ export default function AdminDashboard() {
                 >
                   View Details
                 </button>
-                {group.status !== 'completed' && (
-                  <button 
-                    onClick={() => handleGroupStatusChange(group._id, 'completed')}
-                    className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700"
-                  >
-                    Mark Complete
-                  </button>
-                )}
+                
               </div>
             </div>
           ))}
-        </div>
-      )}
-    </div>
+    </div>  
+  )}    
+  </div>
   )}
-
-
-          {/* Rest of the tabs */}
-        </main>
+ </main>
       </div> 
     </>
   );
