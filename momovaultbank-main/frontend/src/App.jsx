@@ -1,19 +1,22 @@
 import { Route, Routes, Navigate } from "react-router-dom";
+import { useContext } from "react";
+import { Toaster } from "react-hot-toast";
+
 import AuthPage from "@/pages/auth";
 import AdminDashboard from "@/pages/admin";
 import CreateSavingsGroup from "@/pages/savings-groups/create";
 import MyGroups from "@/pages/savings-groups/my-groups";
 import PublicGroups from "@/pages/savings-groups/public";
 import AllGroups from "@/pages/savings-groups/all";
-import RouteGuard from "./components/route-guard";
-import { useContext } from "react";
-import { AuthContext } from "./context/auth-context";
-import { Toaster } from "react-hot-toast";
 import HomePage from "@/pages/user/home";
-import NotFoundPage from "@/pages/not-found";
 import DepositPage from "@/pages/user/deposit";
 import WithdrawPage from "@/pages/user/withdraw";
 import ContributePage from "@/pages/savings-groups/contribute";
+import GroupDetails from "@/pages/savings-groups/details";
+import NotFoundPage from "@/pages/not-found";
+
+import RouteGuard from "./components/route-guard";
+import { AuthContext } from "./context/auth-context";
 
 function App() {
   const { auth } = useContext(AuthContext);
@@ -89,6 +92,7 @@ function App() {
             />
           }
         />
+
         <Route
           path="/savings-groups/my-groups"
           element={
@@ -99,6 +103,7 @@ function App() {
             />
           }
         />
+
         <Route
           path="/savings-groups/public"
           element={
@@ -109,6 +114,7 @@ function App() {
             />
           }
         />
+
         <Route
           path="/savings-groups/all"
           element={
@@ -119,11 +125,23 @@ function App() {
             />
           }
         />
+
         <Route
           path="/savings-groups/:groupId/contribute"
           element={
             <RouteGuard
               element={<ContributePage />}
+              authenticated={auth?.authenticate}
+              user={auth?.user}
+            />
+          }
+        />
+
+        <Route
+          path="/savings-groups/:groupId"
+          element={
+            <RouteGuard
+              element={<GroupDetails />}
               authenticated={auth?.authenticate}
               user={auth?.user}
             />

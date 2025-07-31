@@ -157,7 +157,12 @@ export default function GroupDetails() {
                     <div className="flex items-center gap-3">
                       <FaUserCircle className="text-2xl text-gray-400" />
                       <div>
-                        <p className="font-medium text-gray-800">User #{member.userId.substring(0, 8)}</p>
+                        <p className="font-medium text-gray-800">
+                          {typeof member.userId === 'string' 
+                            ? `User #${member.userId.slice(0, 8)}` 
+                            : `User #${member.userId?._id?.slice(0, 8) || 'Unknown'}`
+                          }
+                        </p>
                         <p className="text-sm text-gray-600">
                           Joined {new Date(member.joinedAt).toLocaleDateString()}
                         </p>
@@ -165,10 +170,13 @@ export default function GroupDetails() {
                     </div>
                     <div className="text-right">
                       <p className="font-medium text-gray-800">
-                        E{member.totalContributed}
+                        E{member.totalContributed || 0}
                       </p>
                       <p className="text-sm text-gray-600">
-                        Last: {new Date(member.lastContribution).toLocaleDateString()}
+                        {member.lastContribution ? 
+                          `Last: ${new Date(member.lastContribution).toLocaleDateString()}` :
+                          'No contributions yet'
+                        }
                       </p>
                     </div>
                   </div>
