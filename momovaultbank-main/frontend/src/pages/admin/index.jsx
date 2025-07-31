@@ -42,33 +42,32 @@ export default function AdminDashboard() {
     const fetchData = async () => {
       try {
         setLoading(true);
-        // Get statistics first
-        const statsRes = await axiosInstance.get("/api/savings-groups/admin/statistics");
+        // Separate the groups request for better error handling
+        const groupsRes = await axiosInstance.get("/api/savings-groups/admin/all");
+        console.log("Groups response:", groupsRes.data); // Debug log
         
-        // Other data fetching
-        const [groupsRes, userRes, txRes, vaultRes] = await Promise.all([
-          axiosInstance.get("/api/savings-groups/admin/all"),
-          axiosInstance.get("/api/admin/users"),
-          axiosInstance.get("/api/admin/transaction"),
-          axiosInstance.get("/api/admin/vault")
-        ]);
-
-        if (statsRes.data.success) {
-          setRevenueData(statsRes.data.data);
+        if (groupsRes.data.success && groupsRes.data.data.groups) {
+          setSavingsGroups(groupsRes.data.data.groups);
         }
 
-        setSavingsGroups(groupsRes.data.data.groups || []);
+        // Other data fetching
+        const [userRes, txRes, vaultRes, revenueRes] = await Promise.all([
+          axiosInstance.get("/api/admin/users"),
+          axiosInstance.get("/api/admin/transaction"),
+          axiosInstance.get("/api/admin/vault"),
+          axiosInstance.get("/api/admin/revenue"),
+        ]);
+
         setUsers(userRes.data.users || []);
         setTransactions(txRes.data.transaction || []);
         setVaults(vaultRes.data.vault || []);
-
+        setRevenueData(revenueRes.data.data || null);
       } catch (err) {
         console.error("Admin fetch error:", err?.response?.data || err.message);
       } finally {
         setLoading(false);
       }
     };
-
     fetchData();
   }, []);
 
@@ -243,7 +242,7 @@ export default function AdminDashboard() {
           {activeTab === 'overview' && (
             <div className="space-y-6">
               {/* Stats Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="bg-white shadow rounded-lg p-6 border-l-4 border-blue-500">
                   <div className="flex items-center justify-between">
                     <div>
@@ -286,22 +285,6 @@ export default function AdminDashboard() {
                       <p className="text-xs text-gray-400">Fees & Penalties</p>
                     </div>
                     <FaMoneyBillWave className="text-3xl text-red-500" />
-                  </div>
-                </div>
-
-                {/* New Total Savings Balance Card */}
-                <div className="bg-white shadow rounded-lg p-6 border-l-4 border-purple-500">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-gray-500">Total Savings Balance</p>
-                      <p className="text-2xl font-bold text-purple-600">
-                        E{(revenueData?.totalSavingsBalance || 0).toFixed(2)}
-                      </p>
-                      <p className="text-xs text-gray-400">
-                        Active Groups: {revenueData?.activeGroups || 0}
-                      </p>
-                    </div>
-                    <FaPiggyBank className="text-3xl text-purple-500" />
                   </div>
                 </div>
               </div>
@@ -737,11 +720,14 @@ export default function AdminDashboard() {
               </div>
             </div>
           ))}
-    </div>  
-  )}    
-  </div>
+        </div>
+      )}
+    </div>
   )}
- </main>
+
+
+          {/* Rest of the tabs */}
+        </main>
       </div> 
     </>
   );

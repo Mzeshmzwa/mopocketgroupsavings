@@ -5,7 +5,7 @@ import { AuthContext } from "@/context/auth-context";
 
 function StudentViewCommonHeader() {
   const navigate = useNavigate();
-  const { resetCredentials } = useContext(AuthContext);
+  const { resetCredentials, auth } = useContext(AuthContext);
   const [showConfirm, setShowConfirm] = useState(false);
 
   function handleLogout() {
@@ -19,7 +19,10 @@ function StudentViewCommonHeader() {
       <header className="flex items-center justify-between p-4 border-b bg-white relative z-50">
         {/* Left: Logo */}
         <div className="flex items-center gap-4">
-          <Link to="/home" className="flex items-center hover:text-black">
+          <Link
+            to={auth.user?.role === "admin" ? "/admin" : "/home"}
+            className="flex items-center hover:text-black"
+          >
             <img
               src="/momobank.png"
               alt="Logo"
