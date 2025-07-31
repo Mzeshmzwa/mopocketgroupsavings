@@ -87,6 +87,7 @@ export default function GroupDetails() {
                 </span>
               </div>
             </div>
+            
 
             {/* Progress and Stats */}
             <div className="p-6 border-b">

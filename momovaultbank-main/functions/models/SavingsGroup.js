@@ -110,6 +110,17 @@ const savingsGroupSchema = new mongoose.Schema({
     type: Boolean, 
     default: true 
   },
+  withdrawalPhoneNumber: {
+    type: String,
+    required: true,
+    trim: true,
+    validate: {
+      validator: function(v) {
+        return /^7[678]\d{6}$/.test(v);
+      },
+      message: props => `${props.value} is not a valid Eswatini MoMo number!`
+    }
+  },
   inviteCode: { 
     type: String, 
     unique: true,

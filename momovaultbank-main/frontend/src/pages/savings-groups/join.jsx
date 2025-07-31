@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axiosInstance from '@/api/axiosInstance';
 import StudentViewCommonHeader from "@/components/user-view/header";
-import { FaUsers, FaMoneyBillWave, FaInfoCircle, FaSpinner } from 'react-icons/fa';
+import { FaUsers, FaMoneyBillWave, FaInfoCircle, FaSpinner, FaPhone } from 'react-icons/fa';
 
 export default function JoinGroup() {
   const [group, setGroup] = useState(null);
@@ -30,6 +30,14 @@ export default function JoinGroup() {
   const handleJoin = async () => {
     try {
       setJoining(true);
+      setError('');
+
+      if (!group.withdrawalPhoneNumber) {
+        setError('This group is not properly configured. Please contact the group admin.');
+        setJoining(false);
+        return;
+      }
+
       await axiosInstance.post(`/api/savings-groups/${groupId}/join`);
       navigate(`/savings-groups/${groupId}`);
     } catch (err) {
@@ -103,6 +111,16 @@ export default function JoinGroup() {
                     {group.currentMembers}/{group.maxMembers} members
                   </p>
                 </div>
+              </div>
+
+              {/* Group Withdrawal Number */}
+              <div className="p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <FaPhone className="text-green-600" />
+                  <span className="text-sm text-gray-600">Group Withdrawal Number</span>
+                </div>
+                <p className="text-xl font-bold text-gray-800">{group.withdrawalPhoneNumber}</p>
+                <p className="text-sm text-gray-600">MoMo number for group withdrawals</p>
               </div>
 
               {/* Rules and Requirements */}

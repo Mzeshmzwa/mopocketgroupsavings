@@ -31,15 +31,25 @@ router.post("/create", authenticateMiddleware, requireAdmin, async (req, res) =>
       allowEarlyWithdrawal,
       penaltyPercentage,
       requiresApproval,
-      isPublic
+      isPublic,
+      withdrawalPhoneNumber
     } = req.body;
 
     // Validation
     if (!name || !description || !targetAmount || !maxMembers || !minimumContribution || 
-        !contributionFrequency || !startDate || !endDate) {
+        !contributionFrequency || !startDate || !endDate || !withdrawalPhoneNumber) {
       return res.status(400).json({
         success: false,
         message: "All required fields must be provided"
+      });
+    }
+
+    // Validate phone number format
+    const phoneRegex = /^7[678]\d{6}$/;
+    if (!phoneRegex.test(withdrawalPhoneNumber)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid phone number format. Must start with 76, 77, or 78 and be 8 digits long."
       });
     }
 
@@ -72,6 +82,7 @@ router.post("/create", authenticateMiddleware, requireAdmin, async (req, res) =>
       startDate: start,
       endDate: end,
       createdBy: req.user._id,
+      withdrawalPhoneNumber,
       rules: {
         allowEarlyWithdrawal: allowEarlyWithdrawal || false,
         penaltyPercentage: penaltyPercentage || 10,

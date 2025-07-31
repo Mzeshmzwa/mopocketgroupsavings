@@ -30,10 +30,19 @@ export default function CreateSavingsGroup() {
     setError('');
 
     try {
+      // Validate phone number
+      const phoneRegex = /^7[678]\d{6}$/;
+      if (!phoneRegex.test(formData.withdrawalPhoneNumber)) {
+        setError('Invalid phone number format. Must start with 76, 77, or 78 and be 8 digits long.');
+        setLoading(false);
+        return;
+      }
+
       const formattedData = {
         ...formData,
         targetAmount: Number(formData.targetAmount),
         maxMembers: Number(formData.maxMembers),
+        withdrawalPhoneNumber: formData.withdrawalPhoneNumber.trim(),
         minimumContribution: Number(formData.minimumContribution),
         penaltyPercentage: Number(formData.penaltyPercentage),
         startDate: new Date(formData.startDate).toISOString(),
@@ -44,10 +53,12 @@ export default function CreateSavingsGroup() {
       const response = await axiosInstance.post('/api/savings-groups/create', formattedData);
       if (response.data.success) {
         navigate('/savings-groups/public'); // Redirect to public groups page after creation
+      } else {
+        setError(response.data.message || 'Failed to create group');
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to create group');
-      console.error('Create group error:', err.response?.data || err.message);
+      console.error('Create group error:', err);
+      setError(err.response?.data?.message || 'Failed to create savings group. Please check all fields.');
     } finally {
       setLoading(false);
     }
@@ -109,6 +120,23 @@ export default function CreateSavingsGroup() {
                   />
                 </div>
               </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Withdrawal Phone Number</label>
+                <input
+                  type="tel"
+                  required
+                  pattern="7[678]\d{6}"
+                  maxLength="8"
+                  placeholder="76123456"
+                  value={formData.withdrawalPhoneNumber || ''}
+                  onChange={(e) =>
+                    setFormData({ ...formData, withdrawalPhoneNumber: e.target.value.trim() })
+                  }
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                />
+                <p className="mt-1 text-sm text-gray-500">Enter MoMo number for withdrawals (e.g. 76123456)</p>
+              </div>
+
 
               <div>
                 <label className="block text-sm font-medium text-gray-700">Minimum Contribution (E)</label>
