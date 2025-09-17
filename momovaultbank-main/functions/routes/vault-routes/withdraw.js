@@ -99,6 +99,22 @@ router.post("/withdraw", authenticateMiddleware, async (req, res) => {
       });
     }
 
+    // Verify the phone number matches the one used for each deposit
+    for (const deposit of lockedDeposits) {
+      if (!deposit.phoneNumber) {
+        return res.status(400).json({
+          success: false,
+          message: `Deposit ${deposit._id} is missing an associated phone number; cannot verify ownership`
+        });
+      }
+      if (deposit.phoneNumber !== formattedPhone) {
+        return res.status(403).json({
+          success: false,
+          message: `Phone number does not match the depositor's number for deposit ${deposit._id}`
+        });
+      }
+    }
+
     const now = new Date();
     const withdrawalDetails = [];
     let totalWithdrawalAmount = 0;

@@ -142,6 +142,7 @@ exports.collect = async function (req, res) {
         amount: parseFloat(amount),
         lockPeriodInDays: parseInt(lockPeriodInDays),
         status: "locked",
+        phoneNumber: formattedPhone,
       });
 
       await Transaction.create({
