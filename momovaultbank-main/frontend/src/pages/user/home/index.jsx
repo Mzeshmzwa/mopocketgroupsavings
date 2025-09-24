@@ -348,19 +348,19 @@ export default function HomePage() {
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 p-4 md:p-8 space-y-6">
+        <main className="flex-1 min-w-0 p-4 md:p-8 space-y-6">
           {/* Header Actions */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
+            <div className="min-w-0">
               <h1 className="text-2xl font-bold text-gray-800">
                 Welcome back, {user?.userName || 'User'}!
               </h1>
-              <p className="text-gray-600">Manage your vault and track your savings</p>
+              <p className="text-gray-600 break-words">Manage your vault and track your savings</p>
               {user?.phoneNumber && (
-                <p className="text-sm text-gray-500">Phone: {user.phoneNumber}</p>
+                <p className="text-sm text-gray-500 break-all">Phone: {user.phoneNumber}</p>
               )}
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
               <button
                 onClick={goToDeposit}
                 className="bg-momoYellow text-momoBlue font-semibold px-4 py-2 rounded-lg hover:brightness-110 flex items-center gap-2 transition-all"
@@ -375,6 +375,26 @@ export default function HomePage() {
                 <FaArrowDown />
                 Withdraw
               </button>
+            </div>
+          </div>
+
+          {/* Mobile Tabs (small screens) */}
+          <div className="md:hidden -mx-4 px-4 overflow-x-auto">
+            <div className="flex gap-2 pb-1">
+              {navItems.map(({ id, icon: Icon, label }) => (
+                <button
+                  key={id}
+                  onClick={() => setActiveTab(id)}
+                  className={`flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-lg border transition-colors text-sm whitespace-nowrap ${
+                    activeTab === id
+                      ? 'bg-momoBlue text-white border-momoBlue'
+                      : 'bg-white text-momoBlue border-gray-200'
+                  }`}
+                >
+                  <Icon />
+                  {label}
+                </button>
+              ))}
             </div>
           </div>
 
@@ -512,7 +532,7 @@ export default function HomePage() {
 
           {/* Deposits Tab */}
           {activeTab === 'deposits' && (
-            <section className="bg-white shadow-lg rounded-lg p-6">
+            <section className="bg-white shadow-lg rounded-lg p-6 overflow-x-auto">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="font-semibold text-lg text-momoBlue">My Locked Deposits</h3>
                 <span className="text-sm text-gray-500">
@@ -521,23 +541,23 @@ export default function HomePage() {
               </div>
               
               {vaultInfo?.lockedDeposits?.length > 0 ? (
-                <div className="space-y-4">
+                <div className="space-y-4 min-w-0">
                   {vaultInfo.lockedDeposits.map((deposit, index) => {
                     const statusInfo = getDepositStatusInfo(deposit);
                     const StatusIcon = statusInfo.icon;
                     
                     return (
                       <div key={deposit._id || index} className={`border rounded-lg p-4 hover:shadow-md transition-all ${statusInfo.bgColor}`}>
-                        <div className="flex justify-between items-start">
-                          <div className="flex-1">
+                        <div className="flex justify-between items-start gap-4">
+                          <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-2">
                               <FaMoneyBillWave className="text-green-600" />
-                              <span className="font-semibold text-lg">{formatCurrency(deposit.amount)}</span>
-                              <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                              <span className="font-semibold text-lg whitespace-nowrap">{formatCurrency(deposit.amount)}</span>
+                              <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded whitespace-nowrap">
                                 {deposit.lockPeriodInDays} day{deposit.lockPeriodInDays !== 1 ? 's' : ''} lock
                               </span>
                             </div>
-                            <div className="text-sm text-gray-600 space-y-1">
+                            <div className="text-sm text-gray-600 space-y-1 break-words">
                               <p><strong>Deposited:</strong> {formatDate(deposit.createdAt)}</p>
                               <p><strong>Matures:</strong> {formatDate(deposit.endDate)}</p>
                               {statusInfo.penalty > 0 && (
@@ -547,8 +567,8 @@ export default function HomePage() {
                               )}
                             </div>
                           </div>
-                          <div className="text-right">
-                            <div className={`flex items-center gap-1 ${statusInfo.color} font-semibold mb-2`}>
+                          <div className="text-right flex-shrink-0">
+                            <div className={`flex items-center gap-1 ${statusInfo.color} font-semibold mb-2 justify-end`}>
                               <StatusIcon />
                               <span className="text-sm">{statusInfo.status}</span>
                             </div>
@@ -583,7 +603,7 @@ export default function HomePage() {
 
           {/* Transactions Tab */}
           {activeTab === 'transactions' && (
-            <section className="bg-white shadow-lg rounded-lg p-6">
+            <section className="bg-white shadow-lg rounded-lg p-6 overflow-x-auto">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="font-semibold text-lg text-momoBlue">Transaction History</h3>
                 <span className="text-sm text-gray-500">
@@ -592,17 +612,17 @@ export default function HomePage() {
               </div>
               
               {vaultInfo?.recentTransactions?.length > 0 ? (
-                <div className="space-y-3">
+                <div className="space-y-3 min-w-0">
                   {vaultInfo.recentTransactions.map((transaction, index) => (
                     <div key={transaction._id || index} className={`border-l-4 p-4 rounded-lg ${getTransactionColor(transaction.type)} hover:shadow-md transition-shadow`}>
-                      <div className="flex justify-between items-start">
-                        <div className="flex items-center gap-3">
+                      <div className="flex justify-between items-start gap-4">
+                        <div className="flex items-center gap-3 min-w-0">
                           {getTransactionIcon(transaction.type)}
-                          <div>
+                          <div className="min-w-0 break-words">
                             <p className="font-semibold capitalize">{transaction.type}</p>
                             <p className="text-sm text-gray-600">{formatDate(transaction.createdAt)}</p>
                             {transaction.momoTransactionId && (
-                              <p className="text-xs text-gray-500 font-mono">
+                              <p className="text-xs text-gray-500 font-mono break-all">
                                 Ref: {transaction.momoTransactionId.substring(0, 12)}...
                               </p>
                             )}
@@ -613,7 +633,7 @@ export default function HomePage() {
                             )}
                           </div>
                         </div>
-                        <div className="text-right">
+                        <div className="text-right flex-shrink-0">
                           <p className={`font-semibold text-lg ${
                             transaction.type === 'deposit' ? 'text-green-600' : 
                             transaction.type === 'withdrawal' ? 'text-blue-600' : 'text-red-600'
@@ -642,7 +662,7 @@ export default function HomePage() {
 
           {/* Withdrawals Tab */}
           {activeTab === 'withdrawals' && (
-            <section className="bg-white shadow-lg rounded-lg p-6">
+            <section className="bg-white shadow-lg rounded-lg p-6 overflow-x-auto">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="font-semibold text-lg text-momoBlue">Withdrawal History & Options</h3>
                 <button
@@ -656,12 +676,12 @@ export default function HomePage() {
 
               {/* Withdrawable Deposits Summary */}
               {withdrawableDeposits.length > 0 && (
-                <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg overflow-x-auto">
                   <h4 className="font-semibold text-blue-800 mb-2 flex items-center gap-2">
                     <FaEye />
                     Available for Withdrawal
                   </h4>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm min-w-0">
                     <div>
                       <span className="text-gray-600">Deposits available:</span>
                       <span className="font-semibold ml-2">{withdrawableDeposits.length}</span>
@@ -684,26 +704,26 @@ export default function HomePage() {
 
               {/* Withdrawal History */}
               {vaultInfo?.recentTransactions?.filter(t => t.type === 'withdrawal').length > 0 ? (
-                <div className="space-y-3">
+                <div className="space-y-3 min-w-0">
                   <h4 className="font-semibold text-gray-700 mb-3">Recent Withdrawals</h4>
                   {vaultInfo.recentTransactions
                     .filter(t => t.type === 'withdrawal')
                     .map((withdrawal, index) => (
                       <div key={withdrawal._id || index} className="border-l-4 border-l-blue-500 bg-blue-50 p-4 rounded-lg hover:shadow-md transition-shadow">
-                        <div className="flex justify-between items-start">
-                          <div className="flex items-center gap-3">
+                        <div className="flex justify-between items-start gap-4">
+                          <div className="flex items-center gap-3 min-w-0">
                             <FaArrowDown className="text-blue-600" />
-                            <div>
+                            <div className="min-w-0 break-words">
                               <p className="font-semibold">Withdrawal</p>
                               <p className="text-sm text-gray-600">{formatDate(withdrawal.createdAt)}</p>
                               {withdrawal.momoTransactionId && (
-                                <p className="text-xs text-gray-500 font-mono">
+                                <p className="text-xs text-gray-500 font-mono break-all">
                                   Ref: {withdrawal.momoTransactionId.substring(0, 12)}...
                                 </p>
                               )}
                             </div>
                           </div>
-                          <div className="text-right">
+                          <div className="text-right flex-shrink-0">
                             <p className="font-semibold text-lg text-blue-600">
                               {formatCurrency(withdrawal.amount)}
                             </p>
