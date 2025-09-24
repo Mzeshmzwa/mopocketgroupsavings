@@ -12,8 +12,6 @@ import {
   FaExclamationTriangle,
   FaLock,
   FaSpinner,
-  FaInfoCircle,
-  FaClock,
   FaMoneyBillWave,
   FaCheckCircle,
   FaTimesCircle,
@@ -355,7 +353,7 @@ export default function HomePage() {
               <h1 className="text-2xl font-bold text-gray-800">
                 Welcome back, {user?.userName || 'User'}!
               </h1>
-              <p className="text-gray-600 break-words">Manage your vault and track your savings</p>
+           
               {user?.phoneNumber && (
                 <p className="text-sm text-gray-500 break-all">Phone: {user.phoneNumber}</p>
               )}
@@ -449,84 +447,10 @@ export default function HomePage() {
                     <FaLock className="text-3xl text-yellow-500" />
                   </div>
                 </div>
-
-                <div className="bg-white shadow-lg rounded-lg p-6 border-l-4 border-red-500 hover:shadow-xl transition-shadow">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="text-sm text-gray-500 font-medium">Total Fees Paid</h3>
-                      <p className="text-2xl font-bold text-red-600">
-                        {formatCurrency(stats?.totalPenalties)}
-                      </p>
-                      <p className="text-xs text-gray-400">{stats?.penaltyTransactionsCount || 0} penalty transactions</p>
-                    </div>
-                    <FaExclamationTriangle className="text-3xl text-red-500" />
-                  </div>
-                </div>
               </section>
 
               {/* Quick Summary */}
-              <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Account Summary */}
-                <div className="bg-white shadow-lg rounded-lg p-6">
-                  <h3 className="font-semibold text-lg text-momoBlue mb-4 flex items-center gap-2">
-                    <FaWallet />
-                    Account Summary
-                  </h3>
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                      <span className="text-gray-600">Total Deposits Made:</span>
-                      <span className="font-semibold">{stats?.depositTransactionsCount || 0}</span>
-                    </div>
-                    <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                      <span className="text-gray-600">Total Withdrawals:</span>
-                      <span className="font-semibold">{stats?.withdrawalTransactionsCount || 0}</span>
-                    </div>
-                    <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                      <span className="text-gray-600">Net Position:</span>
-                      <span className="font-semibold text-blue-600">
-                        {formatCurrency((stats?.totalDeposited || 0) - (stats?.totalWithdrawn || 0))}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center py-2">
-                      <span className="text-gray-600">Vault Balance:</span>
-                      <span className="font-semibold text-green-600">
-                        {formatCurrency(stats?.vaultBalance)}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Withdrawal Rules */}
-                <div className="bg-white shadow-lg rounded-lg p-6">
-                  <h3 className="font-semibold text-lg text-momoBlue mb-4 flex items-center gap-2">
-                    <FaInfoCircle />
-                    Withdrawal Rules
-                  </h3>
-                  <div className="space-y-4">
-                    <div className="border-2 border-yellow-300 bg-yellow-50 rounded-lg p-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <FaExclamationTriangle className="text-yellow-600" />
-                        <span className="font-semibold">Early Withdrawal</span>
-                      </div>
-                      <p className="text-sm text-gray-600">10% penalty + E5 fee if withdrawn before maturity</p>
-                    </div>
-                    <div className="border-2 border-green-300 bg-green-50 rounded-lg p-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <FaCheckCircle className="text-green-600" />
-                        <span className="font-semibold">Matured Withdrawal</span>
-                      </div>
-                      <p className="text-sm text-gray-600">Only E5 flat fee (no penalty) after lock period</p>
-                    </div>
-                    <div className="border-2 border-blue-300 bg-blue-50 rounded-lg p-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <FaClock className="text-blue-600" />
-                        <span className="font-semibold">24-Hour Wait</span>
-                      </div>
-                      <p className="text-sm text-gray-600">Wait 24 hours before withdrawal</p>
-                    </div>
-                  </div>
-                </div>
-              </section>
+              <section className="grid grid-cols-1 lg:grid-cols-2 gap-6"></section>
             </>
           )}
 
