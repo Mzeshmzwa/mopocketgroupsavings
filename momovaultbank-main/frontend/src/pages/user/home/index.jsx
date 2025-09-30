@@ -18,6 +18,9 @@ import {
   FaEye,
   FaChartLine,
   FaUserFriends,
+  FaPlus,
+  FaMinus,
+  FaBook,
 } from "react-icons/fa";
 
 export default function HomePage() {
@@ -29,6 +32,7 @@ export default function HomePage() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [myGroups, setMyGroups] = useState([]);
   const [publicGroups, setPublicGroups] = useState([]);
+  const [showRules, setShowRules] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -362,21 +366,37 @@ export default function HomePage() {
                 <p className="text-sm text-gray-500 break-all">Phone: {user.phoneNumber}</p>
               )}
             </div>
-            <div className="flex gap-2 flex-wrap">
-              <button
-                onClick={goToDeposit}
-                className="bg-momoYellow text-momoBlue font-semibold px-4 py-2 rounded-lg hover:brightness-110 flex items-center gap-2 transition-all"
-              >
-                <FaArrowUp />
-                Deposit
-              </button>
-              <button
-                onClick={goToWithdraw}
-                className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 flex items-center gap-2 transition-all"
-              >
-                <FaArrowDown />
-                Withdraw
-              </button>
+            <div className="flex gap-8 flex-wrap items-center">
+              <div className="flex flex-col items-center">
+                <button
+                  onClick={goToDeposit}
+                  aria-label="Deposit"
+                  className="w-16 h-16 rounded-full bg-gray-900 text-white border border-white flex items-center justify-center hover:bg-black transition-colors"
+                >
+                  <FaPlus className="text-xl" />
+                </button>
+                <span className="mt-2 text-sm text-gray-800">Deposit</span>
+              </div>
+              <div className="flex flex-col items-center">
+                <button
+                  onClick={() => setShowRules(true)}
+                  aria-label="Rules"
+                  className="w-16 h-16 rounded-full bg-gray-900 text-white border border-white flex items-center justify-center hover:bg-black transition-colors"
+                >
+                  <FaBook className="text-xl" />
+                </button>
+                <span className="mt-2 text-sm text-gray-800">Rules</span>
+              </div>
+              <div className="flex flex-col items-center">
+                <button
+                  onClick={goToWithdraw}
+                  aria-label="Withdraw"
+                  className="w-16 h-16 rounded-full bg-gray-900 text-white border border-white flex items-center justify-center hover:bg-black transition-colors"
+                >
+                  <FaMinus className="text-xl" />
+                </button>
+                <span className="mt-2 text-sm text-gray-800">Withdraw</span>
+              </div>
             </div>
           </div>
 
@@ -387,6 +407,39 @@ export default function HomePage() {
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center gap-2">
               <FaTimesCircle />
               {error}
+            </div>
+          )}
+
+          {/* Rules Modal */}
+          {showRules && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+              <div className="bg-white rounded-lg shadow-xl w-[90%] max-w-lg p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                    <FaBook /> Rules
+                  </h2>
+                  <button
+                    onClick={() => setShowRules(false)}
+                    className="text-gray-500 hover:text-gray-700"
+                    aria-label="Close rules"
+                  >
+                    ✕
+                  </button>
+                </div>
+                <div className="text-sm text-gray-700 space-y-3">
+                  <p>• Deposits can be locked for a chosen period to encourage saving.</p>
+                  <p>• Early withdrawals may incur a 10% penalty on the locked amount.</p>
+                  <p>• Always verify your phone number and payment reference before confirming.</p>
+                </div>
+                <div className="mt-6 text-right">
+                  <button
+                    onClick={() => setShowRules(false)}
+                    className="bg-momoBlue text-white px-4 py-2 rounded-lg hover:opacity-90"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
             </div>
           )}
 
