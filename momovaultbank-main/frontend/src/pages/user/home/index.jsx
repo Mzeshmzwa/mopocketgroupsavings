@@ -319,7 +319,11 @@ export default function HomePage() {
 
   return (
     <>
-      <StudentViewCommonHeader />
+      <StudentViewCommonHeader
+        navItems={navItems}
+        activeTab={activeTab}
+        onSelectTab={setActiveTab}
+      />
       <div className="flex min-h-screen bg-gray-50 text-gray-800">
         {/* Sidebar */}
         <aside className="w-64 bg-momoBlue text-white p-6 space-y-6 hidden md:block">
@@ -376,25 +380,7 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Mobile Tabs (small screens) */}
-          <div className="md:hidden -mx-4 px-4 overflow-x-auto">
-            <div className="flex gap-2 pb-1">
-              {navItems.map(({ id, icon: Icon, label }) => (
-                <button
-                  key={id}
-                  onClick={() => setActiveTab(id)}
-                  className={`flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-lg border transition-colors text-sm whitespace-nowrap ${
-                    activeTab === id
-                      ? 'bg-momoBlue text-white border-momoBlue'
-                      : 'bg-white text-momoBlue border-gray-200'
-                  }`}
-                >
-                  <Icon />
-                  {label}
-                </button>
-              ))}
-            </div>
-          </div>
+          {/* Mobile navigation moved to header hamburger menu */}
 
           {/* Error Message */}
           {error && (

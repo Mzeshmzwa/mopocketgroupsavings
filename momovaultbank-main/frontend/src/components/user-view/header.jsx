@@ -1,12 +1,15 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
 import { useContext, useState } from "react";
+import PropTypes from "prop-types";
 import { AuthContext } from "@/context/auth-context";
+import { FaBars } from "react-icons/fa";
 
-function StudentViewCommonHeader() {
+function StudentViewCommonHeader({ navItems, activeTab, onSelectTab }) {
   const navigate = useNavigate();
   const { resetCredentials, auth } = useContext(AuthContext);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   function handleLogout() {
     resetCredentials();
@@ -19,6 +22,40 @@ function StudentViewCommonHeader() {
       <header className="flex items-center justify-between p-4 border-b bg-white relative z-50">
         {/* Left: Logo */}
         <div className="flex items-center gap-4">
+          {Array.isArray(navItems) && navItems.length > 0 && (
+            <div className="md:hidden relative">
+              <button
+                aria-label="Open menu"
+                onClick={() => setMobileMenuOpen((prev) => !prev)}
+                className="p-2 rounded-md border border-gray-200 hover:bg-gray-50 text-momoBlue"
+              >
+                <FaBars />
+              </button>
+              {mobileMenuOpen && (
+                <div className="absolute left-0 mt-2 w-56 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden">
+                  <nav className="py-1">
+                    {navItems.map(({ id, icon: Icon, label }) => (
+                      <button
+                        key={id}
+                        onClick={() => {
+                          onSelectTab && onSelectTab(id);
+                          setMobileMenuOpen(false);
+                        }}
+                        className={`w-full flex items-center gap-2 px-3 py-2 text-left transition-colors ${
+                          activeTab === id
+                            ? "bg-momoBlue/10 text-momoBlue font-semibold"
+                            : "hover:bg-gray-50"
+                        }`}
+                      >
+                        {Icon ? <Icon /> : null}
+                        <span>{label}</span>
+                      </button>
+                    ))}
+                  </nav>
+                </div>
+              )}
+            </div>
+          )}
           <Link
             to={auth.user?.role === "admin" ? "/admin" : "/home"}
             className="flex items-center hover:text-black"
@@ -75,3 +112,21 @@ function StudentViewCommonHeader() {
 }
 
 export default StudentViewCommonHeader;
+
+StudentViewCommonHeader.propTypes = {
+  navItems: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      label: PropTypes.string.isRequired,
+      icon: PropTypes.elementType,
+    })
+  ),
+  activeTab: PropTypes.string,
+  onSelectTab: PropTypes.func,
+};
+
+StudentViewCommonHeader.defaultProps = {
+  navItems: [],
+  activeTab: undefined,
+  onSelectTab: undefined,
+};
