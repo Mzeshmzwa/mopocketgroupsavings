@@ -355,50 +355,52 @@ export default function HomePage() {
 
         {/* Main Content */}
         <main className="flex-1 min-w-0 p-4 md:p-8 space-y-6">
-          {/* Header Actions */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div className="min-w-0">
-              <h1 className="text-2xl font-bold text-gray-800">
-                Welcome back, {user?.userName || 'User'}!
-              </h1>
-           
-              {user?.phoneNumber && (
-                <p className="text-sm text-gray-500 break-all">Phone: {user.phoneNumber}</p>
-              )}
+          {/* Header Actions - only on Dashboard */}
+          {activeTab === 'dashboard' && (
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <div className="min-w-0">
+                <h1 className="text-2xl font-bold text-gray-800">
+                  Welcome back, {user?.userName || 'User'}!
+                </h1>
+              
+                {user?.phoneNumber && (
+                  <p className="text-sm text-gray-500 break-all">Phone: {user.phoneNumber}</p>
+                )}
+              </div>
+              <div className="flex gap-8 flex-wrap items-center">
+                <div className="flex flex-col items-center">
+                  <button
+                    onClick={goToDeposit}
+                    aria-label="Deposit"
+                    className="w-16 h-16 rounded-full bg-gray-900 text-white border border-white flex items-center justify-center hover:bg-black transition-colors"
+                  >
+                    <FaPlus className="text-xl" />
+                  </button>
+                  <span className="mt-2 text-sm text-gray-800">Deposit</span>
+                </div>
+                <div className="flex flex-col items-center">
+                  <button
+                    onClick={() => setShowRules(true)}
+                    aria-label="Rules"
+                    className="w-16 h-16 rounded-full bg-gray-900 text-white border border-white flex items-center justify-center hover:bg-black transition-colors"
+                  >
+                    <FaBook className="text-xl" />
+                  </button>
+                  <span className="mt-2 text-sm text-gray-800">Rules</span>
+                </div>
+                <div className="flex flex-col items-center">
+                  <button
+                    onClick={goToWithdraw}
+                    aria-label="Withdraw"
+                    className="w-16 h-16 rounded-full bg-gray-900 text-white border border-white flex items-center justify-center hover:bg-black transition-colors"
+                  >
+                    <FaMinus className="text-xl" />
+                  </button>
+                  <span className="mt-2 text-sm text-gray-800">Withdraw</span>
+                </div>
+              </div>
             </div>
-            <div className="flex gap-8 flex-wrap items-center">
-              <div className="flex flex-col items-center">
-                <button
-                  onClick={goToDeposit}
-                  aria-label="Deposit"
-                  className="w-16 h-16 rounded-full bg-gray-900 text-white border border-white flex items-center justify-center hover:bg-black transition-colors"
-                >
-                  <FaPlus className="text-xl" />
-                </button>
-                <span className="mt-2 text-sm text-gray-800">Deposit</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <button
-                  onClick={() => setShowRules(true)}
-                  aria-label="Rules"
-                  className="w-16 h-16 rounded-full bg-gray-900 text-white border border-white flex items-center justify-center hover:bg-black transition-colors"
-                >
-                  <FaBook className="text-xl" />
-                </button>
-                <span className="mt-2 text-sm text-gray-800">Rules</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <button
-                  onClick={goToWithdraw}
-                  aria-label="Withdraw"
-                  className="w-16 h-16 rounded-full bg-gray-900 text-white border border-white flex items-center justify-center hover:bg-black transition-colors"
-                >
-                  <FaMinus className="text-xl" />
-                </button>
-                <span className="mt-2 text-sm text-gray-800">Withdraw</span>
-              </div>
-            </div>
-          </div>
+          )}
 
           {/* Mobile navigation moved to header hamburger menu */}
 
@@ -410,8 +412,8 @@ export default function HomePage() {
             </div>
           )}
 
-          {/* Rules Modal */}
-          {showRules && (
+          {/* Rules Modal - only on Dashboard */}
+          {activeTab === 'dashboard' && showRules && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
               <div className="bg-white rounded-lg shadow-xl w-[90%] max-w-lg p-6">
                 <div className="flex items-center justify-between mb-4">
