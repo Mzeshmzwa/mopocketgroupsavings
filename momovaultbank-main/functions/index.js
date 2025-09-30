@@ -1,5 +1,4 @@
-// Firebase-compatible Express app for MoMo API
-const functions = require("firebase-functions");
+// Standalone Express app for MoMo API
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
@@ -107,5 +106,8 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Export Express app as Firebase Function
-exports.api = functions.https.onRequest(app);
+// Start Express server
+const PORT = process.env.PORT || 5001;
+app.listen(PORT, () => {
+  console.log(`Express server listening on http://localhost:${PORT}`);
+});
